@@ -1,7 +1,9 @@
 const Sequelize = require('sequelize');
+const ReviewsModel = require("./Reviews");
 
 module.exports = sequelize => {
-    return  sequelize.define('restaurants', {
+    const Reviews = ReviewsModel(sequelize);
+    let restaurants = sequelize.define('restaurants', {
         id: {
             type: Sequelize.INTEGER,
             autoIncrement: true,
@@ -30,4 +32,6 @@ module.exports = sequelize => {
     }, {
         timestamps: false
     });
+    restaurants.hasMany(Reviews)
+    return restaurants;
 }

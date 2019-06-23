@@ -15,7 +15,11 @@ const sequelize = new Sequelize('sandraalejandra_letseat', 'sandraalejandra_usua
 });
 
 const CategoriesModel = require("./models/Categories")
+const RestaurantsModel = require("./models/Restaurants")
 const Categories = CategoriesModel(sequelize)
+const Restaurants = RestaurantsModel(sequelize)
+const ReviewsModel = require("./models/Reviews");
+const Reviews = ReviewsModel(sequelize);
 
 app.get('/search', (request, response) => {
     let query = request.query.q
@@ -49,34 +53,22 @@ app.get('/search', (request, response) => {
 });
 
 app.get("/restaurants/:category", (request, response) => {
-    let category = request.params.category
-    let restaurants = [
-        {
-            id: 1,
-            name: "Restaurant " + category,
-            address: "Calle falsa #1234",
-            image: "/assets/breakfast3.jpg",
-            rating: "4.5",
-            last_review: {
-                id: 1,
-                review: "Aqui va la ultima reseña lalala blah blah",
-                author: "Author review"
-            }
+    let filterCategory = request.params.category
+    let config = {
+        where: {
+            category: filterCategory
         },
-        {
-            id: 2,
-            name: "Another restaurant " + category,
-            address: "Calle falsa #123",
-            image: "/assets/breakfast3.jpg",
-            rating: "4.5",
-            last_review: {
-                id: 2,
-                review: "Aqui va la ultima resena blah blah",
-                author: "Author"
+        include: [
+            {
+                model: Reviews,
+                limit: 1,
+                order: [["id", "desc"]]
             }
-        }
-    ];
-    response.send(restaurants);
+        ]
+    }
+    Restaurants.findAll(config).then(result => {
+        response.send(result);
+    });
 });
 
 app.get('/categories', (request, response) => {

@@ -11,7 +11,7 @@ module.exports = sequelize => {
             type: Sequelize.STRING,
             allowNull: false
         },
-        restaurant_id:{
+        restaurantId:{
             type: Sequelize.INTEGER,
             allowNull: false
         },
