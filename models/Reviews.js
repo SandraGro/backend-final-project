@@ -1,7 +1,9 @@
 const Sequelize = require('sequelize');
+const UsersModel = require("./Users");
 
 module.exports = sequelize => {
-    return  sequelize.define('reviews', {
+    const Users = UsersModel(sequelize);
+    let reviews =  sequelize.define('reviews', {
         id: {
             type: Sequelize.INTEGER,
             autoIncrement: true,
@@ -19,11 +21,13 @@ module.exports = sequelize => {
             type: Sequelize.FLOAT,
             allowNull: false
         },
-        user_id:{
+        userId:{
             type: Sequelize.INTEGER,
             allowNull: false
         }
     }, {
         timestamps: false
     });
+    reviews.belongsTo(Users);
+    return reviews;
 }

@@ -20,6 +20,8 @@ const Categories = CategoriesModel(sequelize)
 const Restaurants = RestaurantsModel(sequelize)
 const ReviewsModel = require("./models/Reviews");
 const Reviews = ReviewsModel(sequelize);
+const UsersModel = require("./models/Users");
+const Users = UsersModel(sequelize);
 
 app.get('/search', (request, response) => {
     let query = request.query.q
@@ -62,7 +64,8 @@ app.get("/restaurants/:category", (request, response) => {
             {
                 model: Reviews,
                 limit: 1,
-                order: [["id", "desc"]]
+                order: [["id", "desc"]],
+                include:[Users]
             }
         ]
     }

@@ -32,6 +32,6 @@ module.exports = sequelize => {
     }, {
         timestamps: false
     });
-    restaurants.hasMany(Reviews)
+    restaurants.hasMany(Reviews);
     return restaurants;
 }
