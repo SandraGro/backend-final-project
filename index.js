@@ -25,33 +25,24 @@ const Users = UsersModel(sequelize);
 
 app.get('/search', (request, response) => {
     let query = request.query.q
-    let restaurants = [
-        {
-            id: 1,
-            name: "Restaurant " + query,
-            address: "Calle falsa #1234",
-            image: "/assets/breakfast3.jpg",
-            rating: "3",
-            last_review: {
-                id: 1,
-                review: "Aqui va la ultima reseña lalala blah blah",
-                author: "Author review"
-            }
-        },
-        {
-            id: 2,
-            name: "Another restaurant " + query,
-            address: "Calle falsa #123",
-            image: "/assets/breakfast3.jpg",
-            rating: "4.5",
-            last_review: {
-                id: 2,
-                review: "Aqui va la ultima resena blah blah",
-                author: "Author"
-            }
+    let config = {
+            where: {
+                name: {
+                    [Sequelize.Op.like]:'%'+ query +'%'
+                }
+            },
+            include: [
+                {
+                    model: Reviews,
+                    limit: 1,
+                    order: [["id", "desc"]],
+                    include:[Users]
+                }
+            ]
         }
-    ];
-    response.send(restaurants); 
+    Restaurants.findAll(config).then(result => {
+        response.send(result);
+    });
 });
 
 app.get("/restaurants/:category", (request, response) => {
@@ -82,34 +73,21 @@ app.get('/categories', (request, response) => {
 
 app.get('/restaurant/:id', (request, response) => {
     let restaurant = request.params.id;
-    let restaurantDetails = {
-        "id": 2,
-        "name": "Another restaurant " + restaurant,
-        "address": "Calle falsa #123",
-        "images": ['/assets/breakfast4.jpg', '/assets/breakfast2.jpg', '/assets/breakfast5.jpg'],
-        "rating": "4.5",
-        "reviews": [    
+    let config = {
+        where: {
+            id: restaurant
+        },
+        include: [
             {
-                "id": 2,
-                "rating": "2",
-                "review": "Aqui va la ultima reseña blah blah",
-                "author": "Author"
-            },
-            {
-                "id": 3,
-                "rating": "3",
-                "review": "Aqui va la ultima resena blah blah",
-                "author": "Author"
-            },
-            {
-                "id": 4,
-                "rating": "4",
-                "review": "Aqui va la ultima resena blah blah",
-                "author": "Author"
-            },
-
-
+                model: Reviews,
+                order: [["id", "desc"]],
+                include:[Users]
+            }
         ]
     }
-    response.send(restaurantDetails);
-})
+    
+    Restaurants.findOne(config).then(result => {
+        // response.send(restaurantDetails);
+        response.send(result);
+    });
+});
