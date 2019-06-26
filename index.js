@@ -10,8 +10,8 @@ app.use(cors());
 app.listen(port, () => console.log('server running'))
 
 const sequelize = new Sequelize('sandraalejandra_letseat', 'sandraalejandra_usuarioletseat', 'RdMRLSUtCyWX', {
-  host: 'cpanel.sandraalejandra.com',
-  dialect: "mysql"
+    host: 'cpanel.sandraalejandra.com',
+    dialect: "mysql"
 });
 
 const CategoriesModel = require("./models/Categories")
@@ -26,20 +26,20 @@ const Users = UsersModel(sequelize);
 app.get('/search', (request, response) => {
     let query = request.query.q
     let config = {
-            where: {
-                name: {
-                    [Sequelize.Op.like]:'%'+ query +'%'
-                }
-            },
-            include: [
-                {
-                    model: Reviews,
-                    limit: 1,
-                    order: [["id", "desc"]],
-                    include:[Users]
-                }
-            ]
-        }
+        where: {
+            name: {
+                [Sequelize.Op.like]: '%' + query + '%'
+            }
+        },
+        include: [
+            {
+                model: Reviews,
+                limit: 1,
+                order: [["id", "desc"]],
+                include: [Users]
+            }
+        ]
+    }
     Restaurants.findAll(config).then(result => {
         response.send(result);
     });
@@ -56,7 +56,7 @@ app.get("/restaurants/:category", (request, response) => {
                 model: Reviews,
                 limit: 1,
                 order: [["id", "desc"]],
-                include:[Users]
+                include: [Users]
             }
         ]
     }
@@ -68,7 +68,7 @@ app.get("/restaurants/:category", (request, response) => {
 app.get('/categories', (request, response) => {
     Categories.findAll().then(result => {
         response.send(result);
-    });  
+    });
 });
 
 app.get('/restaurant/:id', (request, response) => {
@@ -81,13 +81,42 @@ app.get('/restaurant/:id', (request, response) => {
             {
                 model: Reviews,
                 order: [["id", "desc"]],
-                include:[Users]
+                include: [Users]
             }
         ]
     }
-    
+
     Restaurants.findOne(config).then(result => {
         // response.send(restaurantDetails);
         response.send(result);
     });
+});
+
+app.post('/register', (request, response) => {
+    if(!request.body.name || !request.body.email || !request.body.password){
+        response.status(400).send({ message: "Necesitas completar los datos" });
+        return;
+    }
+
+    Users.findOne({where: {email: request.body.email}}).then(result => {
+        if(result != null){
+            throw "El usuario ya existe."
+        }
+    }).then(result => {
+        let name = request.body.name;
+        let email = request.body.email;
+        let password = request.body.password;
+        return Users.create({
+            name,
+            email,
+            password
+        });
+    }).then (result => {
+        response.send({"result": result}).end();
+    }).catch (err => {
+        response.status(500).send({error: err});
+    });
+
+
+    
 });
