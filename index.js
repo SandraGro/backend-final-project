@@ -4,6 +4,7 @@ const port = 3001;
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const Sequelize = require('sequelize');
+const jwt = require('jsonwebtoken');
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -93,16 +94,16 @@ app.get('/restaurant/:id', (request, response) => {
 });
 
 app.post('/register', (request, response) => {
-    if(!request.body.name || !request.body.email || !request.body.password){
+    if (!request.body.name || !request.body.email || !request.body.password) {
         response.status(400).send({ message: "Necesitas completar los datos" });
         return;
     }
 
-    Users.findOne({where: {email: request.body.email}}).then(result => {
-        if(result != null){
+    Users.findOne({ where: { email: request.body.email } }).then(result => {
+        if (result != null) {
             throw "El usuario ya existe."
         }
-    }).then(result => {
+    }).then(() => {
         let name = request.body.name;
         let email = request.body.email;
         let password = request.body.password;
@@ -111,12 +112,40 @@ app.post('/register', (request, response) => {
             email,
             password
         });
-    }).then (result => {
-        response.send({"result": result}).end();
-    }).catch (err => {
-        response.status(500).send({error: err});
+    }).then(result => {
+        claimUser = {
+            name: result.name,
+            email: result.email
+        }
+        const token = jwt.sign(claimUser, 'secretKey', { expiresIn: '24h' });
+        response.send({ "result": result, "token": token}).end();
+    }).catch(err => {
+        response.status(500).send({ error: err });
     });
+});
 
-
-    
+app.post('/login', (request, response) => {
+    console.log('generando token')
+    //Paso 1.-verificar que el usuario exista en la tabla de cuentas
+    Users.findOne({
+        where: {
+            email: request.body.email,
+            password: request.body.password
+        }
+    }).then((resp) => {
+        console.log(resp)
+        if (!resp) {
+            response.status(401).send({ message: "Usuario o contraseña incorrectos" })
+        } else {
+            claimUser = {
+                name: resp.name,
+                email: resp.email
+            }
+            const token = jwt.sign(claimUser, 'secretKey', { expiresIn: '24h' });
+            console.log(token);
+            response.send({
+                token: token
+            });
+        }
+    });
 });
