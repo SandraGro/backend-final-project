@@ -118,7 +118,7 @@ app.post('/register', (request, response) => {
             email: result.email
         }
         const token = jwt.sign(claimUser, 'secretKey', { expiresIn: '24h' });
-        response.send({ "result": result, "token": token}).end();
+        response.send({ "result": result, "token": token }).end();
     }).catch(err => {
         response.status(500).send({ error: err });
     });
@@ -149,3 +149,25 @@ app.post('/login', (request, response) => {
         }
     });
 });
+
+app.post('/review', (request, response) => {
+    if (!request.body.review || !request.body.rating || !request.body.restaurantId){
+        response.status(400).send({message: "No hay review"})
+    }
+
+    let review = request.body.review;
+    let rating = request.body.rating;
+    let restaurantId = request.body.restaurantId;
+    let userId = 2
+
+    Reviews.create({
+        review,
+        rating,
+        restaurantId,
+        userId,
+    })
+        .then(data => {
+            response.send(data);
+        });
+});
+
