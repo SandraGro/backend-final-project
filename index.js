@@ -115,7 +115,8 @@ app.post('/register', (request, response) => {
     }).then(result => {
         claimUser = {
             name: result.name,
-            email: result.email
+            email: result.email,
+            id: result.idS
         }
         const token = jwt.sign(claimUser, 'secretKey', { expiresIn: '24h' });
         response.send({ "result": result, "token": token }).end();
@@ -139,7 +140,8 @@ app.post('/login', (request, response) => {
         } else {
             claimUser = {
                 name: resp.name,
-                email: resp.email
+                email: resp.email,
+                id: resp.id
             }
             const token = jwt.sign(claimUser, 'secretKey', { expiresIn: '24h' });
             console.log(token);
@@ -151,14 +153,14 @@ app.post('/login', (request, response) => {
 });
 
 app.post('/review', (request, response) => {
-    if (!request.body.review || !request.body.rating || !request.body.restaurantId){
-        response.status(400).send({message: "No hay review"})
+    if (!request.body.review || !request.body.rating || !request.body.restaurantId) {
+        response.status(400).send({ message: "No hay review" })
     }
 
     let review = request.body.review;
     let rating = request.body.rating;
     let restaurantId = request.body.restaurantId;
-    let userId = 2
+    let userId = 2;
 
     Reviews.create({
         review,
@@ -171,3 +173,28 @@ app.post('/review', (request, response) => {
         });
 });
 
+app.delete('/review/:id', (request, response) => {
+    Reviews.destroy({
+        where: {
+            id: request.params.id
+        }
+    }).then(data => {
+        response.send(null);
+    });
+});
+
+app.patch('/review/:id', (request, response) => {
+    Reviews.update(
+        {
+            review: request.body.review,
+            rating: request.body.rating
+        },
+        {
+            where: {
+                id: request.params.id
+            }
+        }).then(data => {
+            console.log('Actualizado');
+            response.send(null);
+        });
+});
