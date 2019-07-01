@@ -36,10 +36,10 @@ app.get('/search', (request, response) => {
             {
                 model: Reviews,
                 limit: 1,
-                order: [["id", "desc"]],
-                include: [Users]
+                include: [Users],
+                order: [["id", "desc"]]
             }
-        ]
+        ],
     }
     Restaurants.findAll(config).then(result => {
         response.send(result);
@@ -81,10 +81,10 @@ app.get('/restaurant/:id', (request, response) => {
         include: [
             {
                 model: Reviews,
-                order: [["id", "desc"]],
                 include: [Users]
             }
-        ]
+        ],
+        order: [[Reviews, 'id', 'desc']]
     }
 
     Restaurants.findOne(config).then(result => {
@@ -160,7 +160,7 @@ app.post('/review', (request, response) => {
     let review = request.body.review;
     let rating = request.body.rating;
     let restaurantId = request.body.restaurantId;
-    let userId = 2;
+    let userId = request.body.userId;
 
     Reviews.create({
         review,
