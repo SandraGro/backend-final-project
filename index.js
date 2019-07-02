@@ -24,6 +24,36 @@ const Reviews = ReviewsModel(sequelize);
 const UsersModel = require("./models/Users");
 const Users = UsersModel(sequelize);
 
+function updateRating(restaurantId){
+    let config = {
+        where: {
+            restaurantId: restaurantId
+        }
+    }
+    let ratingSum = 0;
+    let reviewsCount = 0;
+
+    Reviews.sum('rating', config).then(resultSum => {
+        ratingSum = resultSum;
+        return Reviews.count(config)
+    }).then(resultCount => {
+        reviewsCount = resultCount
+
+        if(reviewsCount == 0){
+            return;
+        }
+        Restaurants.update(
+            {
+                rating: ratingSum/reviewsCount,
+            },
+            {
+                where: {
+                    id: restaurantId
+                }
+        });
+    });
+}
+
 app.get('/search', (request, response) => {
     let query = request.query.q
     let config = {
@@ -116,7 +146,7 @@ app.post('/register', (request, response) => {
         claimUser = {
             name: result.name,
             email: result.email,
-            id: result.idS
+            id: result.id
         }
         const token = jwt.sign(claimUser, 'secretKey', { expiresIn: '24h' });
         response.send({ "result": result, "token": token }).end();
@@ -168,9 +198,10 @@ app.post('/review', (request, response) => {
         restaurantId,
         userId,
     })
-        .then(data => {
-            response.send(data);
-        });
+    .then(data => {
+        response.send(data);
+        updateRating(restaurantId);
+    });
 });
 
 app.delete('/review/:id', (request, response) => {
@@ -193,7 +224,10 @@ app.patch('/review/:id', (request, response) => {
             where: {
                 id: request.params.id
             }
-        }).then(data => {
+        }).then(() => {
+            return Reviews.findOne({where: {id: request.params.id}})
+        }).then((review) => {
+            updateRating(review.restaurantId);
             console.log('Actualizado');
             response.send(null);
         });
