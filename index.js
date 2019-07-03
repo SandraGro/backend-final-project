@@ -1,6 +1,5 @@
 const express = require('express');
 const app = express();
-const port = 3001;
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const Sequelize = require('sequelize');
@@ -8,7 +7,7 @@ const jwt = require('jsonwebtoken');
 
 app.use(bodyParser.json());
 app.use(cors());
-app.listen(port, () => console.log('server running'))
+app.listen(process.env.PORT || 3001, () => console.log('server running'))
 
 const sequelize = new Sequelize('sandraalejandra_letseat', 'sandraalejandra_usuarioletseat', 'RdMRLSUtCyWX', {
     host: 'cpanel.sandraalejandra.com',
