@@ -229,6 +229,6 @@ app.patch('/review/:id', (request, response) => {
         }).then((review) => {
             updateRating(review.restaurantId);
             console.log('Actualizado');
-            response.send(null);
+            response.send({});
         });
 });
